@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby 
+#NB: The above line of code is to ensure operating system knows to interpret this file through Ruby 
+
+require "bundler/setup" #
+require_relative "../config/environment" #requires environment.rb
+
+DailyJobs::CLI.new.call #imagine class called CLI that can be instantiated - call method on it - all needed to start program; encapsulate all of the logic of the CLI into this one object 
+
+
