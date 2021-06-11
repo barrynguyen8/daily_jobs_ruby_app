@@ -1,7 +1,7 @@
+
 class DailyJobs::Job
     
-    attr_accessor :title, :employer, :location, :description, :url 
-    
+    attr_accessor :title, :employer, :location, :description, :url, :details
     @@all = [] # class variable is an empty array 
     
     def initialize #constructor - when ruby creates a new object, it executes this 'constructor' instance method to put default values into instance variables 
@@ -18,7 +18,7 @@ class DailyJobs::Job
     
     def self.today #return a bunch of insteads of Job - eg. [job_1, job_2]
         #scrape Seek.com.au and then return jobs based on that data
-        self.scrape_jobs 
+        self.all 
     
     end 
     
@@ -46,24 +46,38 @@ class DailyJobs::Job
         total_job_listings = doc.css("h1>strong").text.gsub(",","").to_i #total of job listings, and convert string to integer 
         last_page = (total_job_listings.to_f/per_page.to_f).round 
         
-        while page <= last_page 
+        while page <= 5 #last_page 
             pagination_url = "https://www.seek.com.au/full-stack-developer-or-software-engineer-jobs/in-All-Australia?page=#{page}"
             pagination_parsed_page = Nokogiri::HTML(open(pagination_url))
             pagination_job_listings = pagination_parsed_page.css("article")
         
-            
             pagination_job_listings.collect do |job|
                 new_job = self.new
                 new_job.title = "Title: #{job.css("h1>a").text.strip}" #string
                 new_job.employer = "Employer: #{job.css("a._17sHMz8")[0].text.strip}" 
                 new_job.location = job.css("strong._7ZnNccT span._2cFajGc")[0].text.gsub("location:", "Location:").strip
                 new_job.url = "https://www.seek.com.au#{job.css("h1>a").attribute("href").value}"
+                new_job.details = self.scrape_job_details(new_job.url)
                 all_jobs << new_job 
             end 
             page +=1
             print "="
         end 
         all_jobs 
+        
     end 
+    
+    # def self.print_job_details
+    #     puts all_jobs 
+    #     puts "#{new_job.title} - #{new_job.employer} - #{new_job.location}"
+    #     puts "---------------------------------------------------------------------------"
+    #     puts "#{new_job.details}"
+    # end 
+    
+    def self.scrape_job_details(url)
+        doc = Nokogiri::HTML(open(url))
+        doc.css("div.FYwKg._2MJ7O_4._3gJU3_4._36Yi4_4.FLByR_4._85X-f_4._2QIfI_4._2wyod_4").text.strip
+    end 
+    
    # binding.pry    
 end 
